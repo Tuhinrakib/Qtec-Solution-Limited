@@ -1,0 +1,194 @@
+﻿@model IEnumerable<Employee_Management_System.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employee List";
+    int SN = 1;
+}
+
+<h1 class="text-center mb-4">Employee List</h1>
+
+<div class="container">
+    <p>
+        <a asp-action="Create" class="btn btn-success mb-3">
+            <i class="bi bi-plus-lg"></i> Create New
+        </a>
+    </p>
+
+    <!-- Custom Search Input -->
+    <div class="mb-3">
+        <div class="input-group">
+            <input type="text" id="customSearchBox" class="form-control" placeholder="Search Employees">
+            <button id="customSearchButton" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+
+    <section class="Content">
+        <div class="table-responsive">
+            <table id="EmployeeTable" class="table table-striped table-hover table-bordered align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Name)</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Email)</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Phone)</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Position)</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().JoinDate)</th>
+                        <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Status)</th>
+                        <th>Department Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="employee-@item.EmployeeID">
+                            <td>@SN++</td>
+                            <td>@item.Name</td>
+                            <td>@item.Email</td>
+                            <td>@item.Phone</td>
+                            <td>@item.Position</td>
+                            <td>@item.JoinDate.ToString("yyyy-MM-dd")</td>
+                            <td>@item.Status</td>
+                            <td>@(item.Department?.DepartmentName ?? "N/A")</td>
+                            <td class="text-center">
+                                @if (item.IsDeleted)
+                                {
+                                    <a href="#" class="btn btn-sm btn-warning undo-btn" data-id="@item.EmployeeID">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger permanent-delete-btn" data-id="@item.EmployeeID">
+                                        <i class="bi bi-trash"></i> Permanent Delete
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Edit", "Employees", new { id = item.EmployeeID })" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a href="@Url.Action("Details", "Employees", new { id = item.EmployeeID })" class="btn btn-sm btn-info">
+                                        <i class="bi bi-info-circle"></i> Details
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="@item.EmployeeID">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@section Styles {
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable
+            var table = $('#EmployeeTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                responsive: true,
+                language: {
+                    search: "Search Employees:",
+                    lengthMenu: "Show _MENU_ entries",
+                    zeroRecords: "No matching records found",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    infoEmpty: "No records available",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                order: [[0, 'asc']],
+                pageLength: 10
+            });
+
+            // Custom Search Integration with DataTables
+            $('#customSearchButton').on('click', function () {
+                var searchTerm = $('#customSearchBox').val();
+                table.search(searchTerm).draw();
+            });
+
+            $('#customSearchBox').on('keypress', function (e) {
+                if (e.which === 13) { // Enter key
+                    $('#customSearchButton').click();
+                }
+            });
+
+            // Soft Delete
+            $(document).on('click', '.delete-btn', function (e) {
+                e.preventDefault();
+                var employeeId = $(this).data('id');
+                if (confirm("Are you sure you want to delete this employee? This will mark them as deleted.")) {
+                    $.post('/Employees/SoftDelete/' + employeeId, function () {
+                        $('#employee-' + employeeId).find('td').last().html(`
+                                    <a href="#" class="btn btn-sm btn-warning undo-btn" data-id="${employeeId}">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger permanent-delete-btn" data-id="${employeeId}">
+                                        <i class="bi bi-trash"></i> Permanent Delete
+                                    </a>
+                                `);
+                    }).fail(function () {
+                        alert('Error: Could not delete employee.');
+                    });
+                }
+            });
+
+            // Undo Delete
+            $(document).on('click', '.undo-btn', function (e) {
+                e.preventDefault();
+                var employeeId = $(this).data('id');
+                $.post('/Employees/UndoDelete/' + employeeId, function () {
+                    $('#employee-' + employeeId).find('td').last().html(`
+                                <a href="/Employees/Edit/${employeeId}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a href="/Employees/Details/${employeeId}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="${employeeId}">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            `);
+                }).fail(function () {
+                    alert('Error: Could not undo delete.');
+                });
+            });
+
+            // Permanent Delete
+            $(document).on('click', '.permanent-delete-btn', function (e) {
+                e.preventDefault();
+                var employeeId = $(this).data('id');
+                if (confirm("Are you sure you want to permanently delete this employee?")) {
+                    $.post('/Employees/PermanentDelete/' + employeeId, function () {
+                        $('#employee-' + employeeId).remove();
+                    }).fail(function () {
+                        alert('Error: Could not permanently delete employee.');
+                    });
+                }
+            });
+        });
+    </script>
+}

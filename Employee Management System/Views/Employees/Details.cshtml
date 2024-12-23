@@ -1,0 +1,46 @@
+﻿@model Employee_Management_System.Models.Employee
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="container mt-4">
+    <h1 class="text-center text-primary mb-4">Employee Details</h1>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Employee Information</h4>
+            <dl class="row">
+                <dt class="col-sm-4 fw-bold">Name</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+
+                <dt class="col-sm-4 fw-bold">Email</dt>
+                <dd class="col-sm-8">@Model.Email</dd>
+
+                <dt class="col-sm-4 fw-bold">Phone</dt>
+                <dd class="col-sm-8">@Model.Phone</dd>
+
+                <dt class="col-sm-4 fw-bold">Position</dt>
+                <dd class="col-sm-8">@Model.Position</dd>
+
+                <dt class="col-sm-4 fw-bold">Join Date</dt>
+                <dd class="col-sm-8">@Model.JoinDate</dd>
+
+                <dt class="col-sm-4 fw-bold">Status</dt>
+                <dd class="col-sm-8">@Model.Status</dd>
+
+                <dt class="col-sm-4 fw-bold">Department</dt>
+                <dd class="col-sm-8">@Model.Department?.DepartmentName</dd>
+            </dl>
+        </div>
+
+        <div class="card-footer text-center">
+            <a asp-action="Edit" asp-route-id="@Model.EmployeeID" class="btn btn-warning me-2">
+                <i class="bi bi-pencil-square"></i> Edit
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>

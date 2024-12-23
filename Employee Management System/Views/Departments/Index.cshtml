@@ -1,0 +1,116 @@
+﻿@model IEnumerable<Employee_Management_System.Models.Department>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1 class="text-center mb-4">Department List</h1>
+
+<div class="container">
+    <p>
+        <a asp-action="Create" class="btn btn-success mb-3">
+            <i class="bi bi-plus-lg"></i> Create New
+        </a>
+    </p>
+
+    <!-- Search Form -->
+    <div class="mb-3">
+        <div class="input-group">
+            <input type="text" id="customSearchBox" class="form-control" placeholder="Search Departments" />
+            <button id="customSearchButton" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="DepartmentTable" class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.DepartmentName)</th>
+                    <th>@Html.DisplayNameFor(model => model.ManagerID)</th>
+                    <th>@Html.DisplayNameFor(model => model.Budget)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.DepartmentName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.ManagerID)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Budget)</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.DepartmentID" class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.DepartmentID" class="btn btn-sm btn-info">
+                                <i class="bi bi-info-circle"></i> Details
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.DepartmentID" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Styles {
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable with sorting, pagination, and search
+            var table = $('#DepartmentTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "language": {
+                    "search": "Search Departments:",
+                    "lengthMenu": "Show _MENU_ entries",
+                    "zeroRecords": "No matching records found",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                    "infoEmpty": "No records available",
+                    "infoFiltered": "(filtered from _MAX_ total records)",
+                    "paginate": {
+                        "first": "First",
+                        "last": "Last",
+                        "next": "Next",
+                        "previous": "Previous"
+                    }
+                },
+                "order": [[0, 'asc']], // Sort by department name by default
+                "pageLength": 10
+            });
+
+            // Custom Search Button
+            $('#customSearchButton').on('click', function () {
+                var searchTerm = $('#customSearchBox').val();
+                table.search(searchTerm).draw();
+            });
+
+            // Allow Enter Key for Search
+            $('#customSearchBox').on('keypress', function (e) {
+                if (e.which === 13) { // Enter key
+                    $('#customSearchButton').click();
+                }
+            });
+        });
+    </script>
+}
